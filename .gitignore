@@ -1,15 +1,19 @@
-# Environments
-.venv/
+# Virtual Environments (The 65,000 files)
 venv/
-ENV/
 env/
+.venv/
+ENV/
 
 # Python cache
-/__pycache__/
-.py[cod]
-$py.class
+**/__pycache__/
+*.py[cod]
+*$py.class
 
-# Data & Large Files (Common in RL/ML)
-.log
-.sqlite
+# IDE settings
+.vscode/
+.idea/
+
+# Large files/logs
+*.log
+*.sqlite
 .DS_Store
