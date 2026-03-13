@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Surana College - MCA Department</title>
+    <script type="text/javascript" src="/eel.js"></script>
+    <style>
+        :root {
+            --primary-accent: #9370DB; /* Medium Purple */
+            --secondary-accent: #6A5ACD; /* Deeper Purple */
+            --dark-bg: #1a1a2e; /* App background */
+            --panel-bg: #2b2b45; /* Inner box background */
+            --glass-bg: rgba(30, 41, 59, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --light-text: #f8fafc;
+            --secondary-text: #ccc;
+            --danger-red: #f43f5e; /* Bright red for danger/logout */
+            --success-green: #4CAF50;
+            --info-blue: #3b82f6;
+            --input-bg: #333355;
+            --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            /* Centering Fixes: Vertical Centering */
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* FIX: Center vertically */
+            min-height: 100vh;
+            overflow-y: auto;
+            transition: background-color 0.3s;
+            /* Removed padding-top: 20px to allow vertical centering */
+        }
+
+        /* Wrapper now sets the maximum width for the entire app */
+        .main-wrapper {
+            width: 95%;
+            max-width: 1000px;
+        }
+
+        /* General Containers */
+        .view { display: none; width: 100%; }
+        .view.active { display: block; }
+        .container { padding: 20px; }
+
+        /* FIX: Center the small containers (Main Menu, Admin Login) */
+        #mainMenu .container,
+        #adminLoginView .container {
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 40px;
+            border-radius: 10px;
+            background-color: var(--panel-bg);
+        }
+        #adminLoginView .admin-login-container {
+            padding: 0;
+            background-color: transparent;
+        }
+
+        /* FIX: Admin Login Button Centering */
+        #adminLoginView .admin-login-form .form-group {
+            text-align: center;
+        }
+        /* Ensure inputs still take full width inside the centered group */
+        #adminLoginView .admin-login-form .form-group input {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 400px;
+        }
+        /* Make buttons inline-block so text-align: center works on them */
+        #adminLoginView .admin-login-form .form-group .btn {
+            display: inline-block;
+            width: auto;
+            max-width: none;
+            margin: 10px;
+        }
+
+        /* Header */
+        .app-header {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .logo-image { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px; }
+
+        /* Role Card Styling (Replicating Screenshot) */
+        .role-selection {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+            width: 100%;
+        }
+        .role-card {
+            width: 50%;
+            background-color: var(--dark-bg); /* Use the main app background for contrast */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.3s ease;
+        }
+        .role-card:hover {
+            transform: translateY(-5px); /* subtle lift on hover */
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.7);
+        }
+        .role-card h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: var(--light-text);
+        }
+        /* End Role Card Styling */
+
+
+        /* Buttons */
+        .btn {
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+            color: var(--light-text);
+            background-color: var(--primary-accent);
+        }
+        .btn-submit { background-color: var(--success-green); }
+        .btn-submit:hover { background-color: #388e3c; }
+        .btn-back { background-color: #555; }
+        .btn-back:hover { background-color: #777; }
+
+        /* Attractive Logout Button */
+        .btn-logout {
+            background-color: var(--danger-red);
+            font-weight: 700;
+            padding: 14px 35px;
+        }
+        .btn-logout:hover {
+            background-color: #c52945; /* darker red */
+        }
+
+        /* Styling for the single file upload button */
+        .file-label {
+            background-color: var(--primary-accent); /* Match other buttons */
+            text-align: center;
+            display: block;
+            margin-bottom: 20px !important;
+            padding: 14px 28px; /* Match button padding */
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--light-text);
+        }
+
+        /* Hide the native file input visually */
+        #student_image {
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+
+        /* Inputs */
+        input, select {
+            padding: 15px;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: var(--input-bg);
+            color: var(--light-text);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        /* Centering for Admin Panel Buttons */
+        .admin-panel-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center form fields/buttons horizontally */
+        }
+        /* Ensure inputs/selects still take full width inside the centered column */
+        .admin-panel-controls input,
+        .admin-panel-controls select,
+        .admin-panel-controls label {
+            width: 100%;
+            max-width: 400px; /* Optional: Constrain width for cleaner forms */
+        }
+        /* Buttons inside controls should also be centered */
+        .admin-panel-controls .btn {
+            width: 100%;
+            max-width: 400px;
+            margin: 10px 0;
+        }
+
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border-bottom: 1px solid var(--glass-border); padding: 16px; text-align: left; }
+        th { color: var(--primary-accent); font-weight: 600; }
+        tr:hover { background-color: var(--glass-bg); }
+        .table-container {
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        /* Tabs */
+        .tabs { display: flex; border-bottom: 1px solid var(--glass-border); margin-bottom: 20px; }
+        .tab-link {
+            padding: 15px 25px; cursor: pointer; border-bottom: 2px solid transparent;
+            color: var(--secondary-text); transition: all 0.3s ease;
+        }
+        .tab-link.active { border-bottom: 2px solid var(--primary-accent); color: var(--light-text); font-weight: 600; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Status Messages */
+        .status-message { padding: 15px 20px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .status-success { background-color: rgba(34, 197, 94, 0.2); color: var(--success-green); }
+        .status-error { background-color: rgba(244, 63, 94, 0.2); color: var(--danger-red); }
+
+        /* Toast Notification (Off-screen by default) */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; }
+        .toast {
+            padding: 15px 20px; border-radius: 10px; color: var(--light-text); font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); transform: translateX(120%); opacity: 0;
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out; margin-bottom: 10px;
+        }
+        .toast.show { transform: translateX(0); opacity: 1; }
+        .toast.success { background-color: var(--success-green); }
+        .toast.error { background-color: var(--danger-red); }
+        .toast.info { background-color: var(--info-blue); }
+
+        /* Video Feed */
+        .video-container {
+            background-color: #000;
+            border-radius: 10px;
+            width: 60%;
+            min-height: 350px;
+            box-shadow: var(--box-shadow);
+        }
+        #video-feed { width: 100%; height: 100%; display: none; object-fit: cover; border-radius: 10px; }
+        .profile-container {
+            width: 40%;
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .container-fluid { display: flex; gap: 30px; }
+
+        /* Particle Animation (Simplified) */
+        #particle-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute; background: rgba(255, 255, 255, 0.5); border-radius: 50%;
+            animation: move-particles linear infinite;
+        }
+        @keyframes move-particles {
+            0% { transform: translateY(0); opacity: 0.8; }
+            100% { transform: translateY(-100vh); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="particle-container"></div>
+<div id="toast-container"></div>
+
+<div class="main-wrapper"> <div id="mainMenu" class="view active">
+    <div class="container">
+        <div class="app-header">
+            <img src="sc_logo.jpg" alt="College Logo" class="logo-image">
+            <h1>Surana College</h1>
+            <h2>MCA Department</h2>
+        </div>
+        <div class="role-selection">
+            <div class="role-card">
+                <h2>Admin</h2>
+                <button class="btn" onclick="showView('adminLoginView')">Admin Login</button>
+            </div>
+            <div class="role-card">
+                <h2>Student</h2>
+                <button class="btn" onclick="showView('studentLoginView')">Student Login</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="adminLoginView" class="view">
+    <div class="container admin-login-container">
+        <div class="app-header">
+            <img src="sc_logo.jpg" alt="College Logo" class="logo-image">
+            <h1>Surana College</h1>
+            <h2>MCA Department</h2>
+        </div>
+        <div class="admin-login-form">
+            <div class="form-group">
+                <input type="text" id="admin_username" placeholder="Username">
+                <input type="password" id="admin_password" placeholder="Password">
+                <button class="btn btn-submit" onclick="handleAdminLogin()">Login</button>
+                <button class="btn btn-back" onclick="showView('mainMenu')">Back</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="adminPanelView" class="view">
+    <div class="container" style="padding: 0;">
+        <div class="app-header" style="padding-top: 20px;">
+            <img src="sc_logo.jpg" alt="College Logo" class="logo-image">
+            <h1>Surana College</h1>
+            <h2>MCA Department</h2>
+        </div>
+
+        <div class="tabs">
+            <div class="tab-link active" id="studentsTabLink" onclick="openTab(event, 'studentsTab')">Manage Students</div>
+            <div class="tab-link" id="professorsTabLink" onclick="openTab(event, 'professorsTab')">Manage Professors</div>
+            <div class="tab-link" id="subjectsTabLink" onclick="openTab(event, 'subjectsTab')">Manage Subjects</div>
+            <div class="tab-link" id="timetableTabLink" onclick="openTab(event, 'timetableTab')">Manage Timetable</div>
+            <div class="tab-link" id="reportsTabLink" onclick="openTab(event, 'reportsTab')">Attendance Reports</div>
+
+            <button class="btn btn-logout" style="margin-left: auto;" onclick="logoutAdmin()">Logout</button>
+        </div>
+
+        <div class="tab-content-wrapper" style="background-color: var(--panel-bg); padding: 30px; border-radius: 0 0 10px 10px;">
+
+            <div id="studentsTab" class="tab-content active">
+                <h2>Add New Student</h2>
+                <div id="student-form-status" class="status-message" style="display: none;"></div>
+                <div class="admin-panel-controls"> <input type="text" id="student_id" placeholder="Student ID">
+                    <input type="text" id="student_name" placeholder="Name">
+                    <input type="text" id="student_course" value="MCA" readonly>
+                    <select id="student_semester">
+                        <option value="">Select Semester</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                    </select>
+                    <select id="student_specialization">
+                        <option value="">Select Specialization</option><option value="A">A</option><option value="B">B</option><option value="AI/ML">AI/ML</option><option value="CC">CC</option>
+                    </select>
+
+                    <label for="student_image" class="file-label" id="custom-file-label">Choose Image (Face Enrollment)</label>
+
+                    <input type="file" id="student_image" accept="image/*" onchange="previewImage(this)">
+
+                    <button class="btn btn-submit" onclick="handleAddStudent()">Add Student</button>
+                </div>
+                <h2>Existing Students</h2>
+                <div class="table-container">
+                    <table id="studentTable">
+                        <thead><tr><th>ID</th><th>Name</th><th>Course</th><th>Semester</th><th>Specialization</th><th>Action</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="professorsTab" class="tab-content">
+                <h2>Add New Professor</h2>
+                <div id="professor-form-status" class="status-message" style="display: none;"></div>
+                <div class="admin-panel-controls"> <input type="text" id="prof_id" placeholder="Professor ID">
+                    <input type="text" id="prof_name" placeholder="Professor Name">
+                    <button class="btn btn-submit" onclick="handleAddProfessor()">Add Professor</button>
+                </div>
+                <h2>Existing Professors</h2>
+                <div class="table-container">
+                    <table id="professorTable">
+                        <thead><tr><th>ID</th><th>Name</th><th>Action</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="subjectsTab" class="tab-content">
+                <h2>Add New Subject</h2>
+                <div id="subject-form-status" class="status-message" style="display: none;"></div>
+                <div class="admin-panel-controls"> <input type="text" id="subject_id" placeholder="Subject ID (e.g., MCA101)">
+                    <input type="text" id="subject_name" placeholder="Subject Name">
+                    <select id="subject_semester">
+                        <option value="">Select Semester</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                    </select>
+                    <select id="subject_specialization">
+                        <option value="">Select Specialization</option><option value="A">A</option><option value="B">B</option><option value="AI/ML">AI/ML</option><option value="CC">CC</option>
+                    </select>
+                    <select id="subject_prof_name"></select>
+                    <button class="btn btn-submit" onclick="handleAddSubject()">Add Subject</button>
+                </div>
+                <h2>Current Subjects List</h2>
+                <div class="table-container">
+                     <table id="subjectTable">
+                        <thead><tr><th>ID</th><th>Name</th><th>Semester</th><th>Specialization</th><th>Professor</th><th>Action</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="timetableTab" class="tab-content">
+                <h2>Add Timetable Slot</h2>
+                <div id="timetable-form-status" class="status-message" style="display: none;"></div>
+                <div class="admin-panel-controls"> <select id="tt_day">
+                        <option value="">Select Day</option><option value="Monday">Monday</option><option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option>
+                    </select>
+                    <input type="time" id="start_time" step="60" value="09:30">
+                    <input type="time" id="end_time" step="60" value="10:30">
+                    <select id="timetable_subject_select"></select>
+                    <button class="btn btn-submit" onclick="handleAddTimetableSlot()">Add Slot</button>
+                </div>
+                <h2>Master Week Timetable</h2>
+                <div class="table-container">
+                     <table id="timetableTable">
+                         <thead><tr><th>Day</th><th>Start</th><th>End</th><th>Subject</th><th>Action</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="reportsTab" class="tab-content">
+                <h2>Generate Attendance Report</h2>
+                <div class="admin-panel-controls"> <input type="date" id="report_date">
+                    <button class="btn btn-submit" onclick="handleGenerateReport()">Generate Report</button>
+                </div>
+                <div id="report-results" class="table-container">
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="studentLoginView" class="view">
+    <div class="container" style="padding-top: 50px;">
+        <div class="app-header">
+            <img src="sc_logo.jpg" alt="College Logo" class="logo-image" style="width: 60px; height: 60px;">
+            <h1>Surana College</h1>
+            <h2>MCA Department</h2>
+        </div>
+        <div class="container-fluid">
+            <div class="video-container">
+                <img id="video-feed" alt="Webcam Stream">
+                <div id="video-error-msg" style="text-align: center; color: var(--danger-red); padding: 15px;"></div>
+            </div>
+
+            <div class="profile-container">
+                <h2>Login Status</h2>
+                <div id="profile-info">
+                    <p><strong>Name:</strong> <span id="student-name">-</span></p>
+                    <p><strong>Student ID:</strong> <span id="student-id-display">-</span></p>
+                    <p><strong>Course:</strong> <span id="student-course-display">-</span></p>
+                    <p><strong>Semester:</strong> <span id="student-sem-display">-</span></p>
+                </div>
+                <div id="status-message" class="status-message">
+                    Please look at the camera and blink to log in.
+                </div>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn btn-back" onclick="stopStudentLogin()">Back to Menu</button>
+        </div>
+    </div>
+</div>
+
+</div> <script>
+    // --- GLOBAL STATE & UTILITY ---
+    let currentView = 'mainMenu';
+    let imageFile = null;
+
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            toast.addEventListener('transitionend', () => {
+                if (toast.parentElement) {
+                    toast.parentElement.removeChild(toast);
+                }
+            });
+        }, 3000);
+    }
+
+    // --- VIEW MANAGEMENT ---
+    function showView(viewId) {
+        // Stop any running background processes
+        if (currentView === 'studentLoginView') {
+             eel.stop_processing();
+        }
+
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        currentView = viewId;
+
+        // Specific logic for starting the student loop
+        if (viewId === 'studentLoginView') {
+            resetStudentProfile();
+            document.getElementById('video-feed').style.display = 'none';
+            document.getElementById('video-error-msg').textContent = 'Starting webcam...';
+            // Start the Python blocking loop
+            eel.start_student_login();
+        } else if (viewId === 'adminPanelView') {
+            setTimeout(() => { openTab(null, 'studentsTab'); }, 0);
+        }
+    }
+
+    function logoutAdmin() {
+        eel.stop_processing(); // Stop any camera loop running in background (just in case)
+        showView('mainMenu');
+        showToast("Logged out successfully.", 'info');
+    }
+
+    // --- STUDENT PROFILE & VIDEO STREAMING (Called by Python) ---
+
+    function resetStudentProfile() {
+        document.getElementById('student-name').textContent = '-';
+        document.getElementById('student-id-display').textContent = '-';
+        document.getElementById('student-course-display').textContent = '-';
+        document.getElementById('student-sem-display').textContent = '-';
+        document.getElementById('status-message').textContent = 'Please look at the camera and blink to log in.';
+        document.getElementById('status-message').className = 'status-message';
+        document.getElementById('video-error-msg').textContent = '';
+    }
+
+    // EXPOSED: Called by Python to send video feed
+    eel.expose(update_video_feed);
+    function update_video_feed(src) {
+        const videoFeed = document.getElementById('video-feed');
+        const errorMsg = document.getElementById('video-error-msg');
+
+        if (src === "error") {
+            videoFeed.style.display = 'none';
+            errorMsg.textContent = 'Error: Could not access camera. Check permissions.';
+        } else {
+            videoFeed.style.display = 'block';
+            videoFeed.src = src;
+            errorMsg.textContent = '';
+        }
+    }
+
+    // EXPOSED: Called by Python to update recognition status
+    eel.expose(update_login_status);
+    function update_login_status(details, message, type="info") {
+        const statusMsg = document.getElementById('status-message');
+
+        if (details) {
+            document.getElementById('student-name').textContent = details.student_name;
+            document.getElementById('student-id-display').textContent = details.student_id;
+            document.getElementById('student-course-display').textContent = details.course;
+            document.getElementById('student-sem-display').textContent = details.semester;
+
+            statusMsg.textContent = message;
+            statusMsg.className = `status-message status-${type}`;
+        } else {
+            // Unrecognized or Error
+            resetStudentProfile();
+            statusMsg.textContent = message;
+            statusMsg.className = `status-message status-${type}`;
+        }
+    }
+
+    function stopStudentLogin() {
+        eel.stop_processing();
+        showView('mainMenu');
+    }
+
+    // --- ADMIN LOGIN ---
+    async function handleAdminLogin() {
+        const user = document.getElementById('admin_username').value;
+        const pass = document.getElementById('admin_password').value;
+
+        const result = await eel.admin_login(user, pass)();
+
+        if (result.status === 'success') {
+            showToast(result.message, 'success');
+            showView('adminPanelView');
+        } else {
+            showToast(result.message, 'error');
+        }
+    }
+
+    // --- ADMIN PANEL TAB NAVIGATION ---
+    function openTab(evt, tabName) {
+        document.querySelectorAll('#adminPanelView .tab-content').forEach(tc => tc.classList.remove('active'));
+        document.querySelectorAll('#adminPanelView .tab-link').forEach(t1 => t1.classList.remove('active'));
+
+        document.getElementById(tabName).classList.add('active');
+
+        if (evt) {
+             evt.currentTarget.classList.add('active');
+        } else {
+             // For initial load
+             const defaultLink = document.getElementById(tabName + 'TabLink');
+             if (defaultLink) defaultLink.classList.add('active');
+        }
+
+        // Data Loaders
+        if (tabName === 'studentsTab') loadStudentTable();
+        else if (tabName === 'professorsTab') loadProfessorTable();
+        else if (tabName === 'subjectsTab') loadSubjectsFormAndTable();
+        else if (tabName === 'timetableTab') loadTimetableFormAndTable();
+        else if (tabName === 'reportsTab') document.getElementById('report-results').innerHTML = ''; // Clear report area
+    }
+
+    // --- ADMIN CRUD: STUDENTS ---
+    function previewImage(input) {
+        const file = input.files[0];
+        const customLabel = document.getElementById('custom-file-label');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // Store base64 data for Python upload
+                imageFile = e.target.result;
+                // UPDATE LABEL TEXT to show filename
+                customLabel.textContent = `Image Loaded: ${file.name}`;
+                showToast(`Image loaded: ${file.name}`, 'info');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            imageFile = null;
+            // RESET LABEL TEXT
+            customLabel.textContent = 'Choose Image (Face Enrollment)';
+            showToast('No image selected.', 'error');
+        }
+    }
+
+    async function handleAddStudent() {
+        const statusDiv = document.getElementById('student-form-status');
+        const sid = document.getElementById('student_id').value;
+        const n = document.getElementById('student_name').value;
+        const c = document.getElementById('student_course').value; // MCA
+        const sem = document.getElementById('student_semester').value;
+        const spec = document.getElementById('student_specialization').value;
+
+        if (!sid || !n || !c || !sem || !spec || !imageFile) {
+            statusDiv.textContent = 'All fields and an image are required.';
+            statusDiv.classList.add('status-error');
+            statusDiv.style.display = 'block';
+            return;
+        }
+
+        statusDiv.textContent = 'Processing enrollment...';
+        statusDiv.classList.remove('status-error');
+        statusDiv.classList.add('status-info');
+        statusDiv.style.display = 'block';
+
+        const result = await eel.add_student(sid, n, c, sem, spec, imageFile)();
+
+        if (result.status === 'success') {
+            showToast(result.message, 'success');
+            loadStudentTable();
+            document.getElementById('student_id').value = '';
+            document.getElementById('student_name').value = '';
+            document.getElementById('custom-file-label').textContent = 'Choose Image (Face Enrollment)';
+            imageFile = null;
+        } else {
+            showToast(result.message, 'error');
+            statusDiv.textContent = result.message;
+            statusDiv.classList.add('status-error');
+        }
+    }
+
+    async function loadStudentTable() {
+        const tableBody = document.querySelector("#studentTable tbody");
+        tableBody.innerHTML = '<tr><td colspan="6">Loading students...</td></tr>';
+
+        const students = await eel.get_all_students()();
+        tableBody.innerHTML = '';
+
+        if (students && students.length) {
+            students.forEach(s => {
+                // s[0]=id, s[1]=name, s[2]=course, s[3]=semester, s[4]=specialization
+                // ID column is NOT editable (s[0])
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${s[0]}</td>
+                        <td contenteditable="true" data-col="student_name">${s[1]}</td>
+                        <td>${s[2]}</td>
+                        <td contenteditable="true" data-col="semester">${s[3]}</td>
+                        <td contenteditable="true" data-col="specialization">${s[4]}</td>
+                        <td class="action-buttons">
+                            <button class="btn btn-update" onclick="handleUpdateRecord('students', this, '${s[0]}')">Update</button>
+                            <button class="btn btn-remove" onclick="handleDeleteRecord('students', '${s[0]}')">Remove</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } else {
+            tableBody.innerHTML = '<tr><td colspan="6">No students enrolled.</td></tr>';
+        }
+    }
+
+    // --- ADMIN CRUD: PROFESSORS ---
+    async function handleAddProfessor() {
+        const statusDiv = document.getElementById('professor-form-status');
+        const pid = document.getElementById('prof_id').value;
+        const n = document.getElementById('prof_name').value;
+
+        if (!pid || !n) {
+             showToast('ID and Name required.', 'error'); return;
+        }
+
+        const result = await eel.add_professor(pid, n, null)();
+        showToast(result.message, result.status);
+
+        if (result.status === 'success') {
+            document.getElementById('prof_id').value = '';
+            document.getElementById('prof_name').value = '';
+            loadProfessorTable();
+        }
+    }
+
+    async function loadProfessorTable() {
+        const tableBody = document.querySelector("#professorTable tbody");
+        tableBody.innerHTML = '<tr><td colspan="3">Loading professors...</td></tr>';
+
+        const professors = await eel.get_professors()();
+        tableBody.innerHTML = '';
+
+        if (professors && professors.length) {
+            professors.forEach(p => {
+                // p[0]=id, p[1]=name
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${p[0]}</td>
+                        <td contenteditable="true" data-col="prof_name">${p[1]}</td>
+                        <td class="action-buttons">
+                             <button class="btn btn-update" onclick="handleUpdateRecord('professors', this, '${p[0]}')">Update</button>
+                            <button class="btn btn-remove" onclick="handleDeleteRecord('professors', '${p[0]}')">Remove</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } else {
+            tableBody.innerHTML = '<tr><td colspan="3">No professors added.</td></tr>';
+        }
+    }
+
+    // --- ADMIN CRUD: SUBJECTS ---
+    async function loadSubjectsFormAndTable() {
+        // Load professor names for the dropdown
+        const select = document.getElementById('subject_prof_name');
+        select.innerHTML = '<option value="">Select Professor (Teaching)</option>';
+        const professors = await eel.get_professors()();
+        if (professors) {
+            professors.forEach(p => {
+                select.innerHTML += `<option value="${p[1]}">${p[1]}</option>`;
+            });
+        }
+        loadSubjectTable();
+    }
+
+    async function handleAddSubject() {
+        const statusDiv = document.getElementById('subject-form-status');
+        const id = document.getElementById('subject_id').value;
+        const name = document.getElementById('subject_name').value;
+        const sem = document.getElementById('subject_semester').value;
+        const spec = document.getElementById('subject_specialization').value;
+        const prof_name = document.getElementById('subject_prof_name').value;
+
+        if (!id || !name || !sem || !spec || !prof_name) {
+             showToast('All fields required.', 'error'); return;
+        }
+
+        const result = await eel.add_subject(id, name, sem, spec, prof_name)();
+        showToast(result.message, result.status);
+
+        if (result.status === 'success') {
+            document.getElementById('subject_id').value = '';
+            document.getElementById('subject_name').value = '';
+            // Note: Cannot easily reset due to multiple dropdowns/inputs, reload table
+            loadSubjectsFormAndTable();
+            loadTimetableFormAndTable(); // Refresh subject lists in other modules
+        }
+    }
+
+    async function loadSubjectTable() {
+        const tableBody = document.querySelector("#subjectTable tbody");
+        tableBody.innerHTML = '<tr><td colspan="6">Loading subjects...</td></tr>';
+
+        const subjects = await eel.get_subjects()();
+        tableBody.innerHTML = '';
+
+        if (subjects && subjects.length) {
+            subjects.forEach(s => {
+                // s[0]=id, s[1]=name, s[2]=semester, s[3]=specialization, s[4]=prof_name
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${s[0]}</td>
+                        <td contenteditable="true" data-col="subj_name">${s[1]}</td>
+                        <td contenteditable="true" data-col="semester">${s[2]}</td>
+                        <td contenteditable="true" data-col="specialization">${s[3]}</td>
+                        <td contenteditable="true" data-col="prof_name">${s[4]}</td>
+                         <td class="action-buttons">
+                             <button class="btn btn-update" onclick="handleUpdateRecord('subjects', this, '${s[0]}')">Update</button>
+                            <button class="btn btn-remove" onclick="handleDeleteRecord('subjects', '${s[0]}')">Remove</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } else {
+            tableBody.innerHTML = '<tr><td colspan="6">No subjects added.</td></tr>';
+        }
+    }
+
+    // --- ADMIN CRUD: TIMETABLE ---
+    async function loadTimetableFormAndTable() {
+         // Load subject names for the dropdown (uses same logic as subjects tab)
+        const select = document.getElementById('timetable_subject_select');
+        select.innerHTML = '<option value="">Select Subject</option>';
+        const subjects = await eel.get_subjects()();
+        if (subjects) {
+            subjects.forEach(s => {
+                // s[0]=subj_id, s[1]=subj_name
+                select.innerHTML += `<option value="${s[0]}">${s[1]} (Sem ${s[2]})</option>`;
+            });
+        }
+        loadTimetableTable();
+    }
+
+    async function handleAddTimetableSlot() {
+        const day = document.getElementById('tt_day').value;
+        const start = document.getElementById('start_time').value;
+        const end = document.getElementById('end_time').value;
+        const subj_id = document.getElementById('timetable_subject_select').value;
+
+        if (!day || !start || !end || !subj_id) {
+             showToast('All fields required.', 'error'); return;
+        }
+
+        const result = await eel.add_timetable_slot(day, start, end, subj_id)();
+        showToast(result.message, result.status);
+
+        if (result.status === 'success') {
+            document.getElementById('tt_day').value = '';
+            document.getElementById('start_time').value = '09:30';
+            document.getElementById('end_time').value = '10:30';
+            document.getElementById('timetable_subject_select').value = '';
+            loadTimetableTable();
+        }
+    }
+
+    async function loadTimetableTable() {
+        const tableBody = document.querySelector("#timetableTable tbody");
+        tableBody.innerHTML = '<tr><td colspan="5">Loading timetable...</td></tr>';
+
+        const timetable = await eel.get_timetable_slots()();
+        tableBody.innerHTML = '';
+
+        if (timetable && timetable.length) {
+            timetable.forEach(t => {
+                // t[0]=tt_id (PK), t[1]=day, t[2]=start, t[3]=end, t[4]=sub_name (from join), t[5]=sem, t[6]=spec
+                tableBody.innerHTML += `
+                    <tr>
+                        <td data-col="tt_day" contenteditable="true">${t[1]}</td>
+                        <td data-col="start_time" contenteditable="true">${t[2].substring(0, 5)}</td>
+                        <td data-col="end_time" contenteditable="true">${t[3].substring(0, 5)}</td>
+                        <td>${t[4]} (Sem ${t[5]}, Spec ${t[6]})</td>
+                         <td class="action-buttons">
+                             <button class="btn btn-update" onclick="handleUpdateRecord('timetable', this, '${t[0]}')">Update</button>
+                            <button class="btn btn-remove" onclick="handleDeleteRecord('timetable', '${t[0]}')">Remove</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } else {
+            tableBody.innerHTML = '<tr><td colspan="5">No slots scheduled.</td></tr>';
+        }
+    }
+
+    // --- GENERIC CRUD HANDLERS ---
+    async function handleUpdateRecord(table, button, pkValue) {
+        const row = button.closest('tr');
+        // Select only the editable cells with a 'data-col' attribute
+        const cells = row.querySelectorAll('td[contenteditable="true"]');
+        const updateData = {};
+
+        cells.forEach(cell => {
+            // Note: Timetable fields are HH:MM:SS in DB but HTML time input is HH:MM.
+            // We ensure we send back a compatible format if the cell value looks like just HH:MM.
+            let value = cell.textContent.trim();
+            if (cell.dataset.col.includes('_time') && value.length === 5) {
+                value += ':00'; // Append seconds for consistency with DB format
+            }
+            updateData[cell.dataset.col] = value;
+        });
+
+        // Determine the primary key column name based on the table
+        let pkCol;
+        if (table === 'students') pkCol = 'student_id';
+        else if (table === 'professors') pkCol = 'prof_id';
+        else if (table === 'subjects') pkCol = 'subj_id';
+        else if (table === 'timetable') pkCol = 'tt_id';
+        else { showToast('Invalid table for update.', 'error'); return; }
+
+        if (Object.keys(updateData).length === 0) {
+            showToast('No changes detected to update.', 'error');
+            return;
+        }
+
+        const result = await eel.update_record(table, pkCol, pkValue, updateData)();
+        showToast(result.message, result.status);
+
+        // Refresh appropriate table
+        if (result.status === 'success') {
+            if (table === 'students') loadStudentTable();
+            else if (table === 'professors') loadProfessorTable();
+            else if (table === 'subjects') loadSubjectTable();
+            else if (table === 'timetable') loadTimetableTable();
+        }
+    }
+
+    async function handleDeleteRecord(table, pkValue) {
+        if (!confirm(`Are you sure you want to delete record ${pkValue} from ${table}? This action is irreversible.`)) {
+            return;
+        }
+
+        // Determine the primary key column name based on the table
+        let pkCol;
+        if (table === 'students') pkCol = 'student_id';
+        else if (table === 'professors') pkCol = 'prof_id';
+        else if (table === 'subjects') pkCol = 'subj_id';
+        else if (table === 'timetable') pkCol = 'tt_id';
+        else { showToast('Invalid table for deletion.', 'error'); return; }
+
+        const result = await eel.delete_record(table, pkCol, pkValue)();
+        showToast(result.message, result.status);
+
+        // Refresh appropriate table
+        if (result.status === 'success') {
+            if (table === 'students') loadStudentTable();
+            else if (table === 'professors') loadProfessorTable();
+            else if (table === 'subjects') {
+                loadSubjectsFormAndTable();
+                loadTimetableFormAndTable(); // Refresh dependencies
+            }
+            else if (table === 'timetable') loadTimetableTable();
+        }
+    }
+
+    // --- ADMIN CRUD: REPORTS ---
+    async function handleGenerateReport() {
+        const reportDate = document.getElementById('report_date').value;
+        const resultsDiv = document.getElementById('report-results');
+
+        if (!reportDate) { showToast('Please select a date.', 'error'); return; }
+
+        resultsDiv.innerHTML = '<p class="status-message info">Generating report...</p>';
+        const report = await eel.get_attendance_report(reportDate)();
+
+        if (!report || report.students.length === 0) {
+             resultsDiv.innerHTML = '<h3>No attendance records found for this date.</h3>';
+             return;
+        }
+
+        let tableHTML = `<h3 style="margin-top: 0;">Attendance Status for ${reportDate}</h3>`;
+
+        // Status Table
+        tableHTML += '<div class="table-container"><table style="font-size: 0.9em;"><thead><tr><th>Student ID</th><th>Name</th>';
+        report.periods.forEach(p => tableHTML += `<th>${p}</th>`);
+        tableHTML += '</tr></thead><tbody>';
+
+        report.students.forEach(s => {
+            tableHTML += `<tr><td>${s.student_id}</td><td>${s.name}</td>`;
+            s.status.forEach(stat => {
+                const style = stat === 'Present' ? 'color: var(--success-green);' : 'color: var(--danger-red);';
+                tableHTML += `<td style="font-weight: 600; ${style}">${stat}</td>`;
+            });
+            tableHTML += `</tr>`;
+        });
+        tableHTML += '</tbody></table></div>';
+
+        // Percentage Summary
+        tableHTML += '<h3 style="margin-top: 30px;">Subject Percentages</h3>';
+        tableHTML += '<ul style="list-style: none; padding: 0; text-align: left;">';
+        for (const [subject, percent] of Object.entries(report.percentages)) {
+            tableHTML += `<li style="margin-bottom: 5px;"><strong>${subject}:</strong> ${percent}%</li>`;
+        }
+        tableHTML += '</ul>';
+
+        resultsDiv.innerHTML = tableHTML;
+    }
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', function () {
+        // Simple particle generator (runs immediately)
+        const particleContainer = document.getElementById('particle-container');
+        const particleCount = 60;
+        const durationMin = 15;
+        const durationMax = 30;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            const size = Math.random() * 3 + 1; // 1px to 4px
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.top = `${Math.random() * 100}%`;
+            const duration = Math.random() * (durationMax - durationMin) + durationMin;
+            particle.style.animationDuration = `${duration}s`;
+            particle.style.animationDelay = `-${Math.random() * duration}s`; // Start offset
+            particleContainer.appendChild(particle);
+        }
+    });
+
+    window.addEventListener("beforeunload", () => {
+        eel.stop_processing();
+    });
+</script>
+</body>
+</html>

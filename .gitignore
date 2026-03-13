@@ -1,19 +1,41 @@
-# Virtual Environments (The 65,000 files)
-venv/
-env/
-.venv/
-ENV/
+# --- The 17k File Culprits (Specific to your folders) ---
+**/cmake-4.1.0-windows-x86_64/
+**/Scripts/
+**/PyCharm 2025.2/
+**/.idea/
 
-# Python cache
+# --- Python Environment & Library Bloat ---
+**/venv/
+**/env/
+**/.venv/
+**/Lib/
+**/lib/
+**/site-packages/
+**/Include/
+**/bin/
+**/obj/
+
+# --- Jupyter & Python Junk ---
 **/__pycache__/
+**/.ipynb_checkpoints/
 *.py[cod]
 *$py.class
 
-# IDE settings
-.vscode/
-.idea/
+# --- Large Binaries (The 100MB+ blockers) ---
+*.exe
+*.dll
+*.jar
+*.bin
+*.msi
 
-# Large files/logs
-*.log
-*.sqlite
+# --- System & IDE Clutter ---
 .DS_Store
+Thumbs.db
+**/node_modules/
+**/build/
+**/dist/
+.vscode/
+
+# --- Optional: Database ---
+# Since you have a SQLite database, if it ever gets too large:
+# *.sqlite
